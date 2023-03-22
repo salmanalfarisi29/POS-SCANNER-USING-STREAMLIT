@@ -170,7 +170,7 @@ def main():
             (qr_path,) = path
             col1.image(str(qr_path))
             col1.help("QR Code akan terlihat jika ID barang yang dimasukan benar")
-        authenticator.logout("Logout")
+    authenticator.logout("Logout")
 
 # Run the Streamlit app
 if __name__ == "__main__":
