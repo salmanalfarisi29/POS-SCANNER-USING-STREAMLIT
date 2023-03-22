@@ -1,7 +1,11 @@
+import pickle
+from pathlib import Path
+
 import pymysql
 import streamlit as st
 import cv2
 import qrcode
+import streamlit_authenticator as stauth  # pip install streamlit-authenticator
 
 
 def generate_qr_code(cursor, connection, id, item_name):
@@ -82,35 +86,91 @@ def read_item_from_db(cursor, connection):
 
 
 def main():
-    connection, cursor = connect_to_db(3306, "root", "", "dbpenjualan")
-    # st.title("INPUT BARANG")
+    
+    # emojis: https://www.webfx.com/tools/emoji-cheat-sheet/
+    st.set_page_config(page_title="Bagian Gudang", page_icon=":bar_chart:", layout="wide")
 
-    # Membuat kolom untuk menampilkan data barang dan menambahkan barang
-    col1, col2 = st.columns(2)
+    st.header("KOPMA | KOPERASI MANTAP")
+    st.title("BAGIAN GUDANG")
+    
+    # --- USER AUTHENTICATION ---
+    names = ["Salman Alfarisi", "Muhamad Farid"]
+    usernames = ["ssalman", "ffarid"]
 
-    # Menambahkan barang dengan kuantitasnya ke dalam database
-    col1.header("Input Barang")
-    id_barang = col1.text_input(
-        "ID Barang", help="Masukan ID barang", value="", placeholder="ID barang")
-    nama_barang = col1.text_input(
-        "Nama Barang", help="Masukan nama barang", value="", placeholder="Nama barang")
-    kuantitas_stok = col1.number_input("Kuantitas Stok", value=0)
+    # credentials = {
+    #     "usernames":{
+    #         usernames[0]:{
+    #             "name":salman[0],
+    #             "password":alfarisi123[0]
+    #             },
+    #         usernames[1]:{
+    #             "name":farid[1],
+    #             "password":f123[1]
+    #             }            
+    #         }
+    #     }
+    
+    # load hashed passwords
+    file_path = Path(__file__).parent / "hashed_pw.pkl"
+    with file_path.open("rb") as file:
+        hashed_passwords = pickle.load(file)
 
-    if col1.button("Tambahkan Barang"):
-        add_item_to_db(cursor, connection, id_barang,
-                       nama_barang, kuantitas_stok)
-        generate_qr_code(cursor, connection, id_barang, nama_barang)
-        col1.success(
-            "Berhasil!", icon="✅")
+    authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
+        "input barang", "abcdef")
 
-        # Mengembalikan value dari input field menjadi kosong
-        nama_barang = ""
-        kuantitas_stok = 0
+    name, authentication_status, username = authenticator.login("Login", "main")
 
-    # # Menampilkan data barang yang ada di dalam database
-    # col2.header("Daftar Barang")
-    # data_barang = read_item_from_db(cursor, connection)
-    # col2.dataframe(data_barang, width=500)
+    if authentication_status == False:
+        st.error("Username/password is incorrect")
+
+    if authentication_status == None:
+        st.warning("Please enter your username and password")
+
+    if authentication_status:
+    
+        connection, cursor = connect_to_db(3306, "root", "", "dbpenjualan")
+
+        # Membuat kolom untuk menampilkan data barang dan menambahkan barang
+        col1, col2 = st.columns(2)
+
+        # Menambahkan barang dengan kuantitasnya ke dalam database
+        col1.header("Input Barang")
+        id_barang = col1.text_input(
+            "ID Barang", help="Masukan ID barang", value="", placeholder="ID barang")
+        nama_barang = col1.text_input(
+            "Nama Barang", help="Masukan nama barang", value="", placeholder="Nama barang")
+        kuantitas_stok = col1.number_input("Kuantitas Stok", value=0)
+
+        if col1.button("Tambahkan Barang"):
+            add_item_to_db(cursor, connection, id_barang,
+                        nama_barang, kuantitas_stok)
+            generate_qr_code(cursor, connection, id_barang, nama_barang)
+            col1.success(
+                "Berhasil!", icon="✅")
+
+            # Mengembalikan value dari input field menjadi kosong
+            nama_barang = ""
+            kuantitas_stok = 0
+
+        # # Menampilkan data barang yang ada di dalam database
+        # col2.header("Daftar Barang")
+        # data_barang = read_item_from_db(cursor, connection)
+        # col2.dataframe(data_barang, width=500)
+
+        #melihat QR CODE yang sudah digenerate
+        # col1.header("Input Barang")
+        col1, col2 = st.columns(2)
+        
+        # Menampilkan QR Code
+        col1.header("Lihat QR CODE")
+        id_barang = col1.text_input(
+            " SILAHKAN INPUTKAN ID BARANG", help="Akan digunakan untuk memunculkan gambar  QR Code", value="", placeholder="input id barang")
+        if col1.button("Tampilkan"):
+            path = read_qr_image_path_from_db(cursor, connection, id_barang)
+            (qr_path,) = path
+            col1.image(str(qr_path))
+            col1.help("QR Code akan terlihat jika ID barang yang dimasukan benar")
+        authenticator.logout("Logout")
 
 # Run the Streamlit app
 if __name__ == "__main__":

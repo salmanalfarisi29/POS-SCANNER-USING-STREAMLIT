@@ -1,13 +1,14 @@
 import pickle
-from pathlib import path
+from pathlib import Path
 
-import streamlit_authenticator as streamlit_authenticator
+import streamlit_authenticator as stauth
 
-names = ["salman" , "farid"]
-usernames = ["salmann" , "faridd"]
-passwords = ["123" , "1234"]
+names = ["Salman Alfarisi", "Muhamad Farid"]
+usernames = ["ssalman", "ffarid"]
+passwords = ["abc123", "abc321"]
 
 hashed_passwords = stauth.Hasher(passwords).generate()
 
 file_path = Path(__file__).parent / "hashed_pw.pkl"
-with file_path open ()
+with file_path.open("wb") as file:
+    pickle.dump(hashed_passwords, file)

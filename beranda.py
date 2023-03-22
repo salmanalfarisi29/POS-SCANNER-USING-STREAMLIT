@@ -3,7 +3,8 @@ from PIL import Image
 def main_page():
     Original_Image = Image.open("img/kopma logo.png")
     img = Original_Image
-    st.title("Praktikum 6 Pengantar Sistem Informasi")
+    st.title("Pengantar Sistem Informasi")
+    st.title("Praktikum 6 dan 8.2")
     
     st.header("Profile")
     with st.container():
