@@ -13,29 +13,29 @@ import streamlit_authenticator as stauth  # pip install streamlit-authenticator
 def allow_roles(roles):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            gudang = get_gudang()  # fungsi get_gudang() harus didefinisikan terlebih dahulu
-            if gudang['role'] in roles:
+            kasir = get_kasir()  # fungsi get_gudang() harus didefinisikan terlebih dahulu
+            if kasir['role'] in roles:
                 return func(*args, **kwargs)
             else:
                 return "Maaf, kamu tidak memiliki izin untuk mengakses halaman ini."
         return wrapper
     return decorator
 
-def get_gudang():
-    if 'gudang' not in st.session_state:
-        st.session_state['gudang'] = {'name': 'John Doe', 'role': 'guest'}
-    return st.session_state['gudang']
+def get_kasir():
+    if 'kasir' not in st.session_state:
+        st.session_state['kasir'] = {'name': 'John Doe', 'role': 'guest'}
+    return st.session_state['kasir']
 
 
 def login():
     st.title("KOPMA | KOPERASI MANTAP")
-    st.title("LOGIN PEGAWAI GUDANG")
+    st.title("LOGIN PEGAWAI KASIR")
     name = st.text_input("Username:")
     password = st.text_input("Password:", type="password")
     if st.button("Login"):
         if name == "AdminKasir" and password == "kasir123":
             st.success("Login berhasil.")
-            st.session_state['gudang'] = {'name': name, 'role': 'kasir'}
+            st.session_state['kasir'] = {'name': name, 'role': 'kasir'}
         elif name == "AdminGudang" and password == "gudang123":
             st.success("Login berhasil.")
             st.session_state['gudang'] = {'name': name, 'role': 'gudang'}
@@ -118,50 +118,50 @@ def read_item_from_db(cursor, connection):
     cursor.execute(query)
     return cursor.fetchall()
 
-def main():
-    connection, cursor = connect_to_db(3306, "root", "", "dbpenjualan")
-    # Membuat kolom untuk menampilkan data barang dan menambahkan barang
-    col1, col2 = st.columns(2)
+# def main():
+#     connection, cursor = connect_to_db(3306, "root", "", "dbpenjualan")
+#     # Membuat kolom untuk menampilkan data barang dan menambahkan barang
+#     col1, col2 = st.columns(2)
 
-    # Menambahkan barang dengan kuantitasnya ke dalam database
-    col1.header("Input Barang")
-    id_barang = col1.text_input(
-        "ID Barang", help="Masukan ID barang", value="", placeholder="ID barang")
-    nama_barang = col1.text_input(
-        "Nama Barang", help="Masukan nama barang", value="", placeholder="Nama barang")
-    kuantitas_stok = col1.number_input("Kuantitas Stok", value=0)
+#     # Menambahkan barang dengan kuantitasnya ke dalam database
+#     col1.header("Input Barang")
+#     id_barang = col1.text_input(
+#         "ID Barang", help="Masukan ID barang", value="", placeholder="ID barang")
+#     nama_barang = col1.text_input(
+#         "Nama Barang", help="Masukan nama barang", value="", placeholder="Nama barang")
+#     kuantitas_stok = col1.number_input("Kuantitas Stok", value=0)
 
-    if col1.button("Tambahkan Barang"):
-        add_item_to_db(cursor, connection, id_barang,
-                     nama_barang, kuantitas_stok)
-        generate_qr_code(cursor, connection, id_barang, nama_barang)
-        col1.success(
-            "Berhasil!", icon="✅")
+#     if col1.button("Tambahkan Barang"):
+#         add_item_to_db(cursor, connection, id_barang,
+#                      nama_barang, kuantitas_stok)
+#         generate_qr_code(cursor, connection, id_barang, nama_barang)
+#         col1.success(
+#             "Berhasil!", icon="✅")
 
-            # Mengembalikan value dari input field menjadi kosong
-        nama_barang = ""
-        kuantitas_stok = 0
+#             # Mengembalikan value dari input field menjadi kosong
+#         nama_barang = ""
+#         kuantitas_stok = 0
 
-        # # Menampilkan data barang yang ada di dalam database
-        # col2.header("Daftar Barang")
-        # data_barang = read_item_from_db(cursor, connection)
-        # col2.dataframe(data_barang, width=500)
+#         # # Menampilkan data barang yang ada di dalam database
+#         # col2.header("Daftar Barang")
+#         # data_barang = read_item_from_db(cursor, connection)
+#         # col2.dataframe(data_barang, width=500)
 
-        #melihat QR CODE yang sudah digenerate
-        # col1.header("Input Barang")
-        col1, col2 = st.columns(2)
+#         #melihat QR CODE yang sudah digenerate
+#         # col1.header("Input Barang")
+#         col1, col2 = st.columns(2)
         
-        # Menampilkan QR Code
-        col1.header("Simpan QR Code pada directionery")
-        id_barang = col1.text_input(
-            " SILAHKAN INPUTKAN ID BARANG", help="Akan digunakan untuk memunculkan gambar  QR Code", value="", placeholder="input id barang")
-        if col1.button("Simpan"):
-            path = read_qr_image_path_from_db(cursor, connection, id_barang)
-            (qr_path,) = path
-            col1.image(str(qr_path))
-            col1.help("QR Code akan terlihat jika ID barang yang dimasukan benar")
+#         # Menampilkan QR Code
+#         col1.header("Simpan QR Code pada directionery")
+#         id_barang = col1.text_input(
+#             " SILAHKAN INPUTKAN ID BARANG", help="Akan digunakan untuk memunculkan gambar  QR Code", value="", placeholder="input id barang")
+#         if col1.button("Simpan"):
+#             path = read_qr_image_path_from_db(cursor, connection, id_barang)
+#             (qr_path,) = path
+#             col1.image(str(qr_path))
+#             col1.help("QR Code akan terlihat jika ID barang yang dimasukan benar")
 
-def HalamanKasir():
+def main():
     connection, cursor = connect_to_db(3306, "root", "", "dbpenjualan")
     st.title("SCAN")
 
@@ -249,15 +249,15 @@ def kasir_page():
     HalamanKasir()
     
 #admin gudang
-@allow_roles(['gudang'])
-def gudang_page():
-    st.title("Halaman gudang")
-    st.write("Halo gudang!")
+@allow_roles(['kasir'])
+def kasir_page():
+    # st.title("Halaman gudang")
+    # st.write("Halo gudang!")
     main()
 
-if get_gudang()['role'] == 'guest':
+if get_kasir()['role'] == 'guest':
     login()
 elif get_kasir()['role'] == 'admin':
-    kasir_page()
+    kasirr_page()
 else:
-    gudang_page()
+    kasir_page()

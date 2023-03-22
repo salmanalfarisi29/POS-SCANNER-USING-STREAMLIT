@@ -45,7 +45,7 @@ def login():
     if st.button("Login"):
         if name == "AdminKasir" and password == "kasir123":
             st.success("Login berhasil.")
-            st.session_state['gudang'] = {'name': name, 'role': 'kasir'}
+            st.session_state['kasir'] = {'name': name, 'role': 'kasir'}
         elif name == "AdminGudang" and password == "gudang123":
             st.success("Login berhasil.")
             st.session_state['gudang'] = {'name': name, 'role': 'gudang'}
